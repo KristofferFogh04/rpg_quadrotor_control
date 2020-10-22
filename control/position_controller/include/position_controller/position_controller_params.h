@@ -8,6 +8,7 @@ class PositionControllerParams {
  public:
   PositionControllerParams()
       : use_rate_mode(true),
+        px4_mode(true),
         kpxy(0.0),
         kdxy(0.0),
         kpz(0.0),
@@ -32,6 +33,9 @@ class PositionControllerParams {
 
     if (!quadrotor_common::getParam(path_rel_to_node + "/use_rate_mode",
                                     use_rate_mode, pnh)) {
+      return false;
+    }
+    if (!quadrotor_common::getParam(path_rel_to_node + "/px4_mode", px4_mode, pnh)) {
       return false;
     }
 
@@ -104,6 +108,7 @@ class PositionControllerParams {
 
   // Send bodyrate commands if true, attitude commands otherwise
   bool use_rate_mode;
+  bool px4_mode;
 
   double kpxy;  // [1/s^2]
   double kdxy;  // [1/s]

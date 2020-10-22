@@ -1,5 +1,6 @@
 position_controller:
   use_rate_mode: true
+  px4_mode: true
   
   kpxy: 10.0
   kdxy: 4.0

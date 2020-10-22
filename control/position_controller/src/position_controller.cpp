@@ -395,11 +395,20 @@ double PositionController::computeDesiredCollectiveMassNormalizedThrust(
     const PositionControllerParams& config) const {
   const Eigen::Vector3d body_z_axis =
       attitude_estimate * Eigen::Vector3d::UnitZ();
+      double normalized_thrust;
 
-  double normalized_thrust = desired_acc.dot(body_z_axis);
-  if (normalized_thrust < kMinNormalizedCollectiveThrust_) {
-    normalized_thrust = kMinNormalizedCollectiveThrust_;
-  }
+    if (config.px4_mode){
+      normalized_thrust =
+      std::max(0.0, std::min(1.0, norm_thrust_const_ * desired_acc.dot(body_z_axis) + norm_thrust_offset_));
+    }
+    else{
+      normalized_thrust = desired_acc.dot(body_z_axis);
+      if (normalized_thrust < kMinNormalizedCollectiveThrust_) {
+      normalized_thrust = kMinNormalizedCollectiveThrust_;
+      }
+    }
+
+
   return normalized_thrust;
 }
 

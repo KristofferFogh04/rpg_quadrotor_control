@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="quad_name" default="test"/>
+  <arg name="enable_command_feedthrough" default="false" />
+  <arg name="mav_name" default="$(arg quad_name)"/>
+  <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo"/>
+  <arg name="enable_logging" default="false" />
+  <arg name="enable_ground_truth" default="true" />
+  <arg name="log_file" default="$(arg mav_name)" />
+  <arg name="paused" value="true"/>
+  <arg name="gui" value="true"/>
+  <arg name="use_ground_truth" value="true"/>
+  <arg name="verbose" default="false"/>
+  <arg name="debug" default="false"/>
+
+  <arg name="x_init" default="0"/>
+  <arg name="y_init" default="0"/>
+
+<!-- Autopilot -->
+  <node pkg="mavros_autopilot" type="mavros_autopilot" name="mavros_autopilot" output="screen">
+    <rosparam file="$(find state_predictor)/parameters/default.yaml" />
+    <rosparam file="$(find position_controller)/parameters/default.yaml" />
+    <rosparam file="$(find autopilot)/parameters/default.yaml" />
+
+    <param name="position_controller/use_rate_mode" value="True" />
+
+    <param name="velocity_estimate_in_world_frame" value="True" />
+    <param name="state_estimate_timeout" value="0.1" />
+    <param name="control_command_delay" value="0.0" />
+    <param name="enable_command_feedthrough" value="$(arg enable_command_feedthrough)" />
+    <!-- <remap from= /> -->
+    <remap from="autopilot/state_estimate" to="state_estimate" />
+  </node>
+
+  <!-- PX4 keepalive -->
+  <node pkg="px4keepalive" type="px4_keepalive.py" name="px4keepalive" output="screen"/>
+
+
+<node name="rqt_quad_gui" pkg="rqt_gui" type="rqt_gui" 
+    args="-s rqt_quad_gui.basic_flight.BasicFlight --args 
+    --quad_name $(arg quad_name)" output="screen"/>
+
+
+</launch>
