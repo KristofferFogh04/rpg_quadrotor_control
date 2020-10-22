@@ -1,4 +1,7 @@
-# RPG Quadrotor Control
+# RPG Quadrotor Control 
+
+## Version
+This repo is a modified version of the original RPG Quadroto Control repo, which has been modified in order to support mavros interactions with for example a Pixhawk PX4 flight controller. 
 
 ## License
 
