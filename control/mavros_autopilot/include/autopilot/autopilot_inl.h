@@ -109,6 +109,9 @@ AutoPilot<Tcontroller, Tparams>::AutoPilot(const ros::NodeHandle& nh,
   off_sub_ = nh_.subscribe("autopilot/off", 1,
                            &AutoPilot<Tcontroller, Tparams>::offCallback, this);
 
+  dynamic_reconfigure_sub = nh_.subscribe("/setControlParameters", 1,
+                           &AutoPilot<Tcontroller, Tparams>::parameterCallback, this);
+
   // Start watchdog thread
   try {
     watchdog_thread_ =
@@ -379,26 +382,21 @@ void AutoPilot<Tcontroller, Tparams>::cmdLoop(){
 
   switch (autopilot_state_) {
     case States::OFF:
-      ROS_INFO("OFF");
       control_cmd.zero();
       // Reset refence_state so we don't have random values in our autopilot
       // feedback message
       reference_state_ = quadrotor_common::TrajectoryPoint();
       break;
     case States::START:
-      ROS_INFO("START");
       control_cmd = start(predicted_state);
       break;
     case States::HOVER:
-      ROS_INFO("HOVER");
       control_cmd = hover(predicted_state);
       break;
     case States::LAND:
-      ROS_INFO("LAND");
       control_cmd = land(predicted_state);
       break;
     case States::EMERGENCY_LAND:
-      ROS_INFO("EMERGENCY_LAND");
       if (state_estimate_available_) {
         // If we end up here it means that we have regained a valid state
         // estimate, so lets go back to HOVER state unless we were about
@@ -413,34 +411,27 @@ void AutoPilot<Tcontroller, Tparams>::cmdLoop(){
       }
       break;
     case States::BREAKING:
-      ROS_INFO("BREAKING");
       control_cmd = breakVelocity(predicted_state);
       break;
     case States::GO_TO_POSE:
-      ROS_INFO("GO_TO_POSE");
       control_cmd = waitForGoToPoseAction(predicted_state);
       break;
     case States::VELOCITY_CONTROL:
-      ROS_INFO("VELOCITY_CONTROL");
       control_cmd = velocityControl(predicted_state);
       break;
     case States::REFERENCE_CONTROL:
-      ROS_INFO("REFERENCE_CONTROL");
       control_cmd = followReference(predicted_state);
       break;
     case States::TRAJECTORY_CONTROL:
-      ROS_INFO("TRAJECTORY_CONTROL");
       control_cmd = executeTrajectory(predicted_state,
                                       &trajectory_execution_left_duration,
                                       &trajectories_left_in_queue);
       break;
     case States::COMMAND_FEEDTHROUGH:
-      ROS_INFO("COMMAND_FEEDTHROUGH");
       // Do nothing here, command is being published in the command input
       // callback directly
       break;
     case States::RC_MANUAL:
-      ROS_INFO("RC_MANUAL");
       // Send an armed command with zero body rates and hover thrust to avoid
       // letting the low level part switch off when the remote control gives
       // the authority back to our autonomous controller
@@ -812,6 +803,36 @@ void AutoPilot<Tcontroller, Tparams>::forceHoverCallback(
 
   // Mutex is unlocked because it goes out of scope here
 }
+
+template <typename Tcontroller, typename Tparams>
+void AutoPilot<Tcontroller, Tparams>::parameterCallback(
+    const extra_msgs::ParameterCommand::ConstPtr& msg) {
+  if (destructor_invoked_) {
+    return;
+  }
+
+  std::lock_guard<std::mutex> main_lock(main_mutex_);
+
+  ROS_INFO_THROTTLE(0.5, "[%s] Parameter command received",
+                    pnh_.getNamespace().c_str());
+
+  base_controller_params_.kpxy = msg->kpxy;
+  base_controller_params_.kdxy = msg->kdxy;
+  base_controller_params_.kpz = msg->kpz;
+  base_controller_params_.kdz = msg->kdz;
+  base_controller_params_.krp = msg->krp;
+  base_controller_params_.kyaw = msg->kyaw;
+  base_controller_params_.perform_aerodynamics_compensation = msg->perform_aerodynamics_compensation;
+  base_controller_params_.k_drag_x = msg->k_drag_x;
+  base_controller_params_.k_drag_y = msg->k_drag_y;
+  base_controller_params_.k_drag_z = msg->k_drag_z;
+  base_controller_params_.k_thrust_horz = msg->k_thrust_horz;
+
+  std::cout << "from autopilot: " << base_controller_params_.kpxy << std::endl;
+
+  // Mutex is unlocked because it goes out of scope here
+}
+
 
 template <typename Tcontroller, typename Tparams>
 void AutoPilot<Tcontroller, Tparams>::landCallback(

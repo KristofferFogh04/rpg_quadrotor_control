@@ -1,0 +1,5 @@
+<launch>
+    <node name="SetParametersNode" pkg="rqt_quad_control_tuning" type="SetParametersNode" output="screen"/>
+    <node name="SetTrajectoryNode" pkg="rqt_quad_control_tuning" type="SetTrajectoryNode" output="screen"/>
+    <node name="rqt_gui" pkg="rqt_gui" type="rqt_gui"/>
+</launch>
