@@ -79,6 +79,7 @@ void SetTrajectory::computeCircularTrajectory(
   // First send go to command to get the drone to the start point
   // Send pose command
   autopilot_helper_.sendPoseCommand(manual_traj.points.front().position, 0.0);
+  manual_traj.points.pop_front();
 
   // Wait for autopilot to go to got to pose state
   autopilot_helper_.waitForSpecificAutopilotState(
@@ -88,12 +89,8 @@ void SetTrajectory::computeCircularTrajectory(
   autopilot_helper_.waitForSpecificAutopilotState(
       autopilot::States::HOVER, 10.0, kExecLoopRate_);
 
-  while (ros::ok() && !manual_traj.points.empty()) {
-    autopilot_helper_.sendReferenceState(manual_traj.points.front());
-    manual_traj.points.pop_front();
-    ros::spinOnce();
-    command_rate.sleep();
-    }
+  // Send entire trajectory
+  autopilot_helper_.sendTrajectory(manual_traj);
 }
 
 void SetTrajectory::computeVerticalCircularTrajectory(
@@ -123,12 +120,8 @@ void SetTrajectory::computeVerticalCircularTrajectory(
   autopilot_helper_.waitForSpecificAutopilotState(
       autopilot::States::HOVER, 10.0, kExecLoopRate_);
 
-  while (ros::ok() && !manual_traj.points.empty()) {
-    autopilot_helper_.sendReferenceState(manual_traj.points.front());
-    manual_traj.points.pop_front();
-    ros::spinOnce();
-    command_rate.sleep();
-    }
+  // Send entire trajectory
+  autopilot_helper_.sendTrajectory(manual_traj);
 }
 
 void SetTrajectory::computeMinimumSnapRingTrajectory(
@@ -136,7 +129,6 @@ void SetTrajectory::computeMinimumSnapRingTrajectory(
     double max_thrust,
     double max_roll_pitch_rate){
   
-  ros::Rate command_rate(kExecLoopRate_);
 // Ring trajectory
   std::vector<Eigen::Vector3d> way_points;
   way_points.push_back(Eigen::Vector3d(-0.5, 0.0, 2.5));
@@ -163,6 +155,9 @@ void SetTrajectory::computeMinimumSnapRingTrajectory(
   trajectory_generation_helper::heading::addConstantHeadingRate(0.0, M_PI,
                                                                 &ring_traj);
 
+  // Last trajectory point is for some reason weird so we remove it
+  ring_traj.points.pop_back();
+
   // Go to first point of trajectory manually
   autopilot_helper_.sendPoseCommand(ring_traj.points.front().position, 0.0);
 
@@ -175,14 +170,8 @@ void SetTrajectory::computeMinimumSnapRingTrajectory(
       autopilot::States::HOVER, 10.0, kExecLoopRate_);
 
   // Send entire trajectory
-  //autopilot_helper_.sendTrajectory(ring_traj);
+  autopilot_helper_.sendTrajectory(ring_traj);
 
-  while (ros::ok() && !ring_traj.points.empty()) {
-  autopilot_helper_.sendReferenceState(ring_traj.points.front());
-  ring_traj.points.pop_front();
-  ros::spinOnce();
-  command_rate.sleep();
-  }
 }
 
 void SetTrajectory::computeLemniscateTrajectory(
@@ -234,6 +223,7 @@ void SetTrajectory::computeLemniscateTrajectory(
 
   // Send entire trajectories 
   autopilot_helper_.sendTrajectory(trajectory);
+
 }
 
 void SetTrajectory::computeSquareTrajectory(
@@ -268,6 +258,9 @@ void SetTrajectory::computeSquareTrajectory(
   trajectory_generation_helper::heading::addConstantHeadingRate(0.0, M_PI,
                                                                 &ring_traj);
 
+   // Last trajectory point is for some reason weird so we remove it
+  ring_traj.points.pop_back();
+
   // Go to first point of trajectory manually
   autopilot_helper_.sendPoseCommand(ring_traj.points.front().position, 0.0);
 
@@ -281,6 +274,7 @@ void SetTrajectory::computeSquareTrajectory(
 
   // Send entire trajectory
   autopilot_helper_.sendTrajectory(ring_traj);
+
 }
 
  // Main node

@@ -54,6 +54,6 @@ class SetTrajectory
   int traj_type_;
 
   // Constants
-  static constexpr double kExecLoopRate_ = 50.0;
+  static constexpr double kExecLoopRate_ = 30.0;
 
 };  // End of Class
