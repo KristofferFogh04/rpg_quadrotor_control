@@ -1,16 +1,12 @@
 #include <rqt_quad_control_tuning/set_trajectory.h>
 
-
-
 SetTrajectory::SetTrajectory(ros::NodeHandle& nh_) : // default constructor for
 nh_(nh_)
 {
-  std::cout << "Not implemented" << std::endl;
+  std::cout << "Void constructor" << std::endl;
   // ROS publishers:
   
 }
-
-
 
 void SetTrajectory::trajectoryCallback(
   rqt_quad_control_tuning::setTrajectoryConfig &config,
@@ -22,34 +18,48 @@ void SetTrajectory::trajectoryCallback(
   case 0:
     std::cout << "Doing nothing" << std::endl;
     break;
-
   case 1:
-    std::cout << "Waypoints not implemented" << std::endl;
+    std::cout << "Horizontal Circle" << std::endl;
+    SetTrajectory::computeCircularTrajectory(
+      config.speed, 
+      config.circle_radius, 
+      config.num_rotations);
     break;
   case 2:
-    std::cout << "Horizontal Circle" << std::endl;
-    SetTrajectory::computeCircularTrajectory(config.speed, config.circle_radius, config.num_rotations);
+    std::cout << "Vertical Circle" << std::endl;
+    SetTrajectory::computeVerticalCircularTrajectory(
+      config.speed, 
+      config.circle_radius, 
+      config.num_rotations, 
+      config.circle_orientation);
     break;
   case 3:
-    std::cout << "Vertical Circle" << std::endl;
-    SetTrajectory::computeVerticalCircularTrajectory(config.speed, config.circle_radius, config.num_rotations, config.circle_orientation);
+    std::cout << "Minimum Snap Ring Trajectory" << std::endl;
+    SetTrajectory::computeMinimumSnapRingTrajectory(
+      config.speed, 
+      config.max_thrust, 
+      config.max_roll_pitch_rate);
     break;
   case 4:
-    std::cout << "Not implemented" << std::endl;
+    std::cout << "Lemniscate Trajectory" << std::endl;
+    SetTrajectory::SetTrajectory::computeLemniscateTrajectory(
+    config.circle_radius, 
+    config.speed,
+    0, config.num_rotations*2*M_PI,
+    kExecLoopRate_);
     break;
   case 5:
-    std::cout << "Not implemented" << std::endl;
-    break;
-  case 6:
-    std::cout << "Not implemented" << std::endl;
-    break;
-  case 7:
-    std::cout << "Not implemented" << std::endl;
+    std::cout << "Square Minimum Snap" << std::endl;
+    SetTrajectory::computeSquareTrajectory(      
+      config.circle_radius,
+      config.speed, 
+      config.max_thrust, 
+      config.max_roll_pitch_rate);
     break;
   default:
   std::cout << "Not recognized. Doing nothing" << std::endl;
     // code block
-}
+  }
 }
 
 void SetTrajectory::computeCircularTrajectory(
@@ -95,11 +105,11 @@ void SetTrajectory::computeVerticalCircularTrajectory(
   ros::Rate command_rate(kExecLoopRate_);
 
   // Generate trajectory, sample it and send it as reference states
-  const Eigen::Vector3d center = Eigen::Vector3d(-2.0, 0.0, 10);
+  const Eigen::Vector3d center = Eigen::Vector3d(-2.0, 0.0, 12);
 
   quadrotor_common::Trajectory manual_traj =
       trajectory_generation_helper::circles::computeVerticalCircleTrajectory(
-          center, orientation, radius, max_vel, 0.0, num_rotations*2*M_PI, kExecLoopRate_);
+          center, orientation, radius, max_vel, 0.0, -num_rotations*2*M_PI, kExecLoopRate_);
 
   // First send go to command to get the drone to the start point
   // Send pose command
@@ -121,6 +131,157 @@ void SetTrajectory::computeVerticalCircularTrajectory(
     }
 }
 
+void SetTrajectory::computeMinimumSnapRingTrajectory(
+    double max_vel,
+    double max_thrust,
+    double max_roll_pitch_rate){
+  
+  ros::Rate command_rate(kExecLoopRate_);
+// Ring trajectory
+  std::vector<Eigen::Vector3d> way_points;
+  way_points.push_back(Eigen::Vector3d(-0.5, 0.0, 2.5));
+  way_points.push_back(Eigen::Vector3d(1.5, -1.5, 1.6));
+  way_points.push_back(Eigen::Vector3d(3.5, 0.0, 3.0));
+  way_points.push_back(Eigen::Vector3d(1.5, 2.0, 1.6));
+
+  Eigen::VectorXd initial_ring_segment_times =
+      Eigen::VectorXd::Ones(int(way_points.size()));
+  polynomial_trajectories::PolynomialTrajectorySettings
+      ring_trajectory_settings;
+  ring_trajectory_settings.continuity_order = 4;
+  Eigen::VectorXd minimization_weights(5);
+  minimization_weights << 0.0, 1.0, 1.0, 1.0, 1.0;
+  ring_trajectory_settings.minimization_weights = minimization_weights;
+  ring_trajectory_settings.polynomial_order = 11;
+  ring_trajectory_settings.way_points = way_points;
+
+  quadrotor_common::Trajectory ring_traj = trajectory_generation_helper::
+      polynomials::generateMinimumSnapRingTrajectoryWithSegmentRefinement(
+          initial_ring_segment_times, ring_trajectory_settings, max_vel,
+          max_thrust, max_roll_pitch_rate, kExecLoopRate_);
+
+  trajectory_generation_helper::heading::addConstantHeadingRate(0.0, M_PI,
+                                                                &ring_traj);
+
+  // Go to first point of trajectory manually
+  autopilot_helper_.sendPoseCommand(ring_traj.points.front().position, 0.0);
+
+  // Wait for autopilot to go to got to pose state
+  autopilot_helper_.waitForSpecificAutopilotState(
+      autopilot::States::TRAJECTORY_CONTROL, 2.0, kExecLoopRate_);
+
+  // Wait for autopilot to go back to hover
+  autopilot_helper_.waitForSpecificAutopilotState(
+      autopilot::States::HOVER, 10.0, kExecLoopRate_);
+
+  // Send entire trajectory
+  //autopilot_helper_.sendTrajectory(ring_traj);
+
+  while (ros::ok() && !ring_traj.points.empty()) {
+  autopilot_helper_.sendReferenceState(ring_traj.points.front());
+  ring_traj.points.pop_front();
+  ros::spinOnce();
+  command_rate.sleep();
+  }
+}
+
+void SetTrajectory::computeLemniscateTrajectory(
+    const double radius, const double speed,
+    const double phi_start, const double phi_end,
+    const double sampling_frequency) {
+
+  quadrotor_common::Trajectory trajectory;
+  trajectory.trajectory_type =
+      quadrotor_common::Trajectory::TrajectoryType::GENERAL;
+
+  const double phi_total = phi_end - phi_start;
+  const double direction = phi_total / fabs(phi_total);
+  const double omega = direction * fabs(speed / radius);
+  const double angle_step = fabs(omega / sampling_frequency);
+
+  for (double d_phi = 0.0; d_phi < fabs(phi_total); d_phi += angle_step) {
+    const double phi = phi_start + direction * d_phi;
+    const double sin_phi = sin(phi);
+    const double sincos_phi = sin(phi)*cos(phi);
+
+    quadrotor_common::TrajectoryPoint point;
+    point.time_from_start = ros::Duration(fabs(d_phi / omega));
+    point.position = radius * Eigen::Vector3d(cos(phi), sin(phi)*cos(phi), 5.0/radius);
+
+    // All the derivatives
+    point.velocity = 
+        radius * omega * Eigen::Vector3d(-sin(phi), pow(cos(phi), 2.0) - pow(sin(phi), 2.0), 0.0);
+    point.acceleration =
+        radius * pow(omega, 2.0) * Eigen::Vector3d(-cos(phi), -4*cos(phi)*sin(phi) , 0.0);
+    point.jerk =
+        radius * pow(omega, 3.0) * Eigen::Vector3d(sin(phi), 4*(pow(sin(phi), 2.0) - pow(cos(phi), 2.0)), 0.0);
+    point.snap =
+        radius * pow(omega, 4.0) * Eigen::Vector3d(cos(phi), 16*cos(phi)*sin(phi), 0.0);
+
+    trajectory.points.push_back(point);
+  }
+
+  // Go to first point of trajectory manually
+  autopilot_helper_.sendPoseCommand(trajectory.points.front().position, 0.0);
+
+  // Wait for autopilot to go to got to pose state
+  autopilot_helper_.waitForSpecificAutopilotState(
+      autopilot::States::TRAJECTORY_CONTROL, 2.0, kExecLoopRate_);
+
+  // Wait for autopilot to go back to hover
+  autopilot_helper_.waitForSpecificAutopilotState(
+      autopilot::States::HOVER, 10.0, kExecLoopRate_);
+
+  // Send entire trajectories 
+  autopilot_helper_.sendTrajectory(trajectory);
+}
+
+void SetTrajectory::computeSquareTrajectory(
+  double radius, 
+  double speed, 
+  double max_thrust, 
+  double max_roll_pitch_rate){
+
+// Ring trajectory
+  std::vector<Eigen::Vector3d> way_points;
+  way_points.push_back(Eigen::Vector3d(radius, 0.0, 3.0));
+  way_points.push_back(Eigen::Vector3d(0.0, radius, 3.0));
+  way_points.push_back(Eigen::Vector3d(-radius, 0.0, 3.0));
+  way_points.push_back(Eigen::Vector3d(0.0, -radius, 3.0));
+
+  Eigen::VectorXd initial_ring_segment_times =
+      Eigen::VectorXd::Ones(int(way_points.size()));
+  polynomial_trajectories::PolynomialTrajectorySettings
+      ring_trajectory_settings;
+  ring_trajectory_settings.continuity_order = 4;
+  Eigen::VectorXd minimization_weights(5);
+  minimization_weights << 0.0, 1.0, 1.0, 1.0, 1.0;
+  ring_trajectory_settings.minimization_weights = minimization_weights;
+  ring_trajectory_settings.polynomial_order = 11;
+  ring_trajectory_settings.way_points = way_points;
+
+  quadrotor_common::Trajectory ring_traj = trajectory_generation_helper::
+      polynomials::generateMinimumSnapRingTrajectoryWithSegmentRefinement(
+          initial_ring_segment_times, ring_trajectory_settings, speed,
+          max_thrust, max_roll_pitch_rate, kExecLoopRate_);
+
+  trajectory_generation_helper::heading::addConstantHeadingRate(0.0, M_PI,
+                                                                &ring_traj);
+
+  // Go to first point of trajectory manually
+  autopilot_helper_.sendPoseCommand(ring_traj.points.front().position, 0.0);
+
+  // Wait for autopilot to go to got to pose state
+  autopilot_helper_.waitForSpecificAutopilotState(
+      autopilot::States::TRAJECTORY_CONTROL, 2.0, kExecLoopRate_);
+
+  // Wait for autopilot to go back to hover
+  autopilot_helper_.waitForSpecificAutopilotState(
+      autopilot::States::HOVER, 10.0, kExecLoopRate_);
+
+  // Send entire trajectory
+  autopilot_helper_.sendTrajectory(ring_traj);
+}
 
  // Main node
 int main (int argc, char** argv)

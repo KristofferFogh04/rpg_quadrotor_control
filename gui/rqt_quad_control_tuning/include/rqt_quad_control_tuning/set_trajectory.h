@@ -2,7 +2,6 @@
 #include <vector>
 #include <Eigen/Dense>
 #include <geometry_msgs/PoseStamped.h>
-#include <extra_msgs/ParameterCommand.h>
 #include <dynamic_reconfigure/server.h>
 #include <rqt_quad_control_tuning/setControlParametersConfig.h>
 #include <rqt_quad_control_tuning/setTrajectoryConfig.h>
@@ -10,6 +9,7 @@
 #include <trajectory_generation_helper/heading_trajectory_helper.h>
 #include <trajectory_generation_helper/circle_trajectory_helper.h>
 #include <trajectory_generation_helper/polynomial_trajectory_helper.h>
+#include <cmath>
 
 class SetTrajectory
 {
@@ -23,8 +23,26 @@ class SetTrajectory
     uint32_t level);
 
   void computeCircularTrajectory(double max_vel, double radius, int num_rotations);
-  void computeVerticalCircularTrajectory(double max_vel, double radius, int num_rotations, double orientation);
-  
+  void computeVerticalCircularTrajectory(
+    double max_vel, 
+    double radius, 
+    int num_rotations, 
+    double orientation);
+  void computeMinimumSnapRingTrajectory(
+    double max_vel, 
+    double max_thrust, 
+    double max_roll_pitch_rate);
+  void computeLemniscateTrajectory(
+    const double radius, const double speed,
+    const double phi_start, const double phi_end,
+    const double sampling_frequency);
+  void computeSquareTrajectory(
+    double radius, 
+    double speed, 
+    double max_thrust, 
+    double max_roll_pitch_rate);
+
+
  private:
 
   ros::NodeHandle nh_; 
