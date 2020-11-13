@@ -13,6 +13,7 @@
 
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
+
 #include <nav_msgs/Odometry.h>
 #include <position_controller/position_controller.h>
 #include <position_controller/position_controller_params.h>
@@ -131,6 +132,7 @@ class AutoPilot {
   ros::Publisher control_command_pub_;
   ros::Publisher autopilot_feedback_pub_;
   ros::Publisher px4_keepalive_pub;
+  ros::Publisher reference_pub_;
 
   ros::Subscriber pose_estimate_sub_;
   ros::Subscriber velocity_estimate_sub_;
@@ -153,6 +155,7 @@ class AutoPilot {
 
   quadrotor_common::TrajectoryPoint reference_state_;
   quadrotor_common::Trajectory reference_trajectory_;
+  nav_msgs::Odometry ref_point_;
 
   // Values received from callbacks
   quadrotor_common::QuadStateEstimate received_state_est_;

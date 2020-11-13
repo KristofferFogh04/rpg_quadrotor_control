@@ -67,6 +67,8 @@ AutoPilot<Tcontroller, Tparams>::AutoPilot(const ros::NodeHandle& nh,
 
   px4_keepalive_pub = nh_.advertise<std_msgs::Header>("/px4_keepalive", 1);
 
+  reference_pub_ = nh_.advertise<nav_msgs::Odometry>("autopilot/odometry_ref", 1);
+
   // Subscribers
   pose_estimate_sub_ =
       nh_.subscribe("mavros/local_position/pose", 1,
@@ -1254,6 +1256,18 @@ AutoPilot<Tcontroller, Tparams>::executeTrajectory(
     }
   }
   *trajectories_left_in_queue = trajectory_queue_.size();
+
+  // publish reference state as 
+  quadrotor_common::TrajectoryPoint traj_point(
+      reference_trajectory_.points.front());
+
+  ref_point_ = nav_msgs::Odometry();
+  ref_point_.pose.pose.position = quadrotor_common::vectorToPoint(quadrotor_common::eigenToGeometry(traj_point.position));
+  ref_point_.pose.pose.orientation = quadrotor_common::eigenToGeometry(traj_point.orientation);
+  ref_point_.header.frame_id = "map";
+  ref_point_.child_frame_id = "base_link";
+  reference_pub_.publish(ref_point_);
+
 
   const quadrotor_common::ControlCommand command = base_controller_.run(
       state_estimate, reference_trajectory_, base_controller_params_);
