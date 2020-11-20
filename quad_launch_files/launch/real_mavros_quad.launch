@@ -13,7 +13,7 @@
   <arg name="use_ground_truth" value="true"/>
   <arg name="verbose" default="false"/>
   <arg name="debug" default="false"/>
-  <arg name="fcu_url" default="/dev/ttyTHS2>921600"/>
+  <arg name="fcu_url" default="/dev/ttyTHS2:921600"/>
 
   <arg name="x_init" default="0"/>
   <arg name="y_init" default="0"/>
@@ -39,7 +39,7 @@
   <node pkg="px4keepalive" type="px4_keepalive.py" name="px4keepalive" output="screen"/>
 
   <include file="$(find mavros)/launch/px4.launch">
-	<arg name="fcu_url" value="$arg fcu_url)"/>
+	<arg name="fcu_url" value="$(arg fcu_url)"/>
   </include>
 
 
