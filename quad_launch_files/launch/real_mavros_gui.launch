@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="quad_name" default="test"/>
+  <arg name="enable_command_feedthrough" default="false" />
+  <arg name="mav_name" default="$(arg quad_name)"/>
+  <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo"/>
+  <arg name="enable_logging" default="false" />
+  <arg name="enable_ground_truth" default="true" />
+  <arg name="log_file" default="$(arg mav_name)" />
+  <arg name="paused" value="true"/>
+  <arg name="gui" value="true"/>
+  <arg name="use_ground_truth" value="true"/>
+  <arg name="verbose" default="false"/>
+  <arg name="debug" default="false"/>
+
+  <arg name="x_init" default="0"/>
+  <arg name="y_init" default="0"/>
+
+<node name="rqt_quad_gui" pkg="rqt_gui" type="rqt_gui" 
+    args="-s rqt_quad_gui.basic_flight.BasicFlight --args 
+    --quad_name $(arg quad_name)" output="screen"/>
+
+
+</launch>
