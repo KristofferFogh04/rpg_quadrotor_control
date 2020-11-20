@@ -31,8 +31,8 @@
     <param name="control_command_delay" value="0.0" />
     <param name="enable_command_feedthrough" value="$(arg enable_command_feedthrough)" />
     <!-- <remap from= /> -->
-    <!--remap from="autopilot/state_estimate" to="state_estimate" /-->
-    <remap from="vicon/ground_truth" to="state_estimate" />
+    <remap from="autopilot/state_estimate" to="state_estimate" />
+    <!--remap from="vicon/ground_truth" to="state_estimate" /-->
   </node>
 
   <!-- PX4 keepalive -->
