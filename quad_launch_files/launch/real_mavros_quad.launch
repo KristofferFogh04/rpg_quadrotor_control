@@ -22,7 +22,7 @@
   <node pkg="mavros_autopilot" type="mavros_autopilot" name="mavros_autopilot" output="screen">
     <rosparam file="$(find state_predictor)/parameters/default.yaml" />
     <rosparam file="$(find position_controller)/parameters/default.yaml" />
-    <rosparam file="$(find autopilot)/parameters/default.yaml" />
+    <rosparam file="$(find mavros_autopilot)/parameters/default.yaml" />
 
     <param name="position_controller/use_rate_mode" value="True" />
 
@@ -31,15 +31,16 @@
     <param name="control_command_delay" value="0.0" />
     <param name="enable_command_feedthrough" value="$(arg enable_command_feedthrough)" />
     <!-- <remap from= /> -->
-    <remap from="autopilot/state_estimate" to="state_estimate" />
-    <!--remap from="vicon/ground_truth" to="state_estimate" /-->
+    <!--remap from="autopilot/state_estimate" to="state_estimate" /-->
+    <remap from="mavros/local_position/pose" to="autopilot/vicon_pose" />
   </node>
 
   <!-- PX4 keepalive -->
   <node pkg="px4keepalive" type="px4_keepalive.py" name="px4keepalive" output="screen"/>
 
+  <!-- MAVROS launch /-->
   <include file="$(find mavros)/launch/px4.launch">
-	<arg name="fcu_url" value="$(arg fcu_url)"/>
+	  <arg name="fcu_url" value="$(arg fcu_url)"/>
   </include>
 
 
