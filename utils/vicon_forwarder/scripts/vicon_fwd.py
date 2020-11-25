@@ -12,7 +12,7 @@ class ViconAdapter:
         seg_name = str(argv[2])
         rospy.init_node("vicon_forwarder", anonymous=True)
         self.sub = rospy.Subscriber("vicon/" + sub_name + "/" + seg_name, Transform, self.vicon_callback)
-        self.pub = rospy.Publisher("autopilot/vicon_pose", PoseStamped, queue_size=10)
+        self.pub = rospy.Publisher("/mavros/vision_pose/pose", PoseStamped, queue_size=10)
         self.pub_msg = PoseStamped()
         self.pub_msg.header.frame_id = 'odom'
         self.seq = 0

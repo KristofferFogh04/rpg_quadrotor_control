@@ -2,8 +2,8 @@
 <launch>
 
   <arg name="quad_name" default="test"/>
-  <arg name="subject_name" default="kristoffer_racer"/>
-  <arg name="segment_name" default="something_else"/>
+  <arg name="subject_name" default="kri_racer"/>
+  <arg name="segment_name" default="kri_racer"/>
   
 
 <node name="rqt_quad_gui" pkg="rqt_gui" type="rqt_gui" 

@@ -32,7 +32,7 @@
     <param name="enable_command_feedthrough" value="$(arg enable_command_feedthrough)" />
     <!-- <remap from= /> -->
     <!--remap from="autopilot/state_estimate" to="state_estimate" /-->
-    <remap from="mavros/local_position/pose" to="autopilot/vicon_pose" />
+    <!--remap from="mavros/local_position/pose" to="autopilot/vicon_pose" /-->
   </node>
 
   <!-- PX4 keepalive -->
