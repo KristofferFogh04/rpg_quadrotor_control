@@ -13,7 +13,6 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-  vicon_bridge
 )
 
 ## System dependencies are found with CMake's conventions
@@ -108,7 +107,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES vicon_forwarder
-#  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy std_msgs vicon_bridge
+#  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
 
