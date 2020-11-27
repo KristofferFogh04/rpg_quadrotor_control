@@ -69,6 +69,17 @@ AutoPilot<Tcontroller, Tparams>::AutoPilot(const ros::NodeHandle& nh,
 
   reference_pub_ = nh_.advertise<nav_msgs::Odometry>("autopilot/odometry_ref", 1);
 
+  home_pub_ = nh_.advertise<mavros_msgs::HomePosition>("mavros/home_position", 1);
+  mavros_msgs::HomePosition homepos;
+  //homepos.latitude = 56.206180;
+  //homepos.longitude = 10.187857;
+  //homepos.altitude = 0;
+  homepos.position.x = 0;
+  homepos.position.y = 0;
+  homepos.position.z = 0;
+
+  home_pub_.publish(homepos);
+
   // Subscribers
   pose_estimate_sub_ =
       nh_.subscribe("mavros/local_position/pose", 1,

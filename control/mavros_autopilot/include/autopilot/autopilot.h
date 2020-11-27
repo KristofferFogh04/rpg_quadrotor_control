@@ -10,6 +10,7 @@
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/AttitudeTarget.h>
 #include <mavros_msgs/CompanionProcessStatus.h>
+#include <mavros_msgs/HomePosition.h>
 
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/TwistStamped.h>
@@ -133,6 +134,7 @@ class AutoPilot {
   ros::Publisher autopilot_feedback_pub_;
   ros::Publisher px4_keepalive_pub;
   ros::Publisher reference_pub_;
+  ros::Publisher home_pub_;
 
   ros::Subscriber pose_estimate_sub_;
   ros::Subscriber velocity_estimate_sub_;
