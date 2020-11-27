@@ -36,7 +36,7 @@
   </node>
 
   <!-- PX4 keepalive -->
-  <node pkg="px4keepalive" type="px4_keepalive.py" name="px4keepalive" output="screen"/>
+  <!--node pkg="px4keepalive" type="px4_keepalive.py" name="px4keepalive" output="screen"/-->
 
   <!-- MAVROS launch /-->
   <include file="$(find mavros)/launch/px4.launch">
