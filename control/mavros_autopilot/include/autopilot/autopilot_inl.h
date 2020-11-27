@@ -70,16 +70,13 @@ AutoPilot<Tcontroller, Tparams>::AutoPilot(const ros::NodeHandle& nh,
   reference_pub_ = nh_.advertise<nav_msgs::Odometry>("autopilot/odometry_ref", 1);
 
   home_pub_ = nh_.advertise<mavros_msgs::HomePosition>("mavros/home_position/set", 1);
-  mavros_msgs::HomePosition homepos;
-  homepos.header.stamp = ros::Time::now();
-  homepos.geo.latitude = 56.206180;
-  homepos.geo.longitude = 10.187857;
-  homepos.geo.altitude = 0;
-  homepos.position.x = 0;
-  homepos.position.y = 0;
-  homepos.position.z = 0;
-
-  home_pub_.publish(homepos);
+  homepos_.header.stamp = ros::Time::now();
+  homepos_.geo.latitude = 56.206180;
+  homepos_.geo.longitude = 10.187857;
+  homepos_.geo.altitude = 0;
+  homepos_.position.x = 0;
+  homepos_.position.y = 0;
+  homepos_.position.z = 0;
 
   // Subscribers
   pose_estimate_sub_ =
@@ -352,6 +349,7 @@ void AutoPilot<Tcontroller, Tparams>::cmdLoop(){
 
   std::lock_guard<std::mutex> main_lock(main_mutex_);
 
+  home_pub_.publish(homepos_);
   nav_msgs::Odometry temp_state_estimate_msg;
   temp_state_estimate_msg.pose.pose = temp_pose_estimate_.pose;
   temp_state_estimate_msg.twist.twist = temp_vel_estimate_.twist;

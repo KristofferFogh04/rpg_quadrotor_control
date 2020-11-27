@@ -158,6 +158,7 @@ class AutoPilot {
   quadrotor_common::TrajectoryPoint reference_state_;
   quadrotor_common::Trajectory reference_trajectory_;
   nav_msgs::Odometry ref_point_;
+  mavros_msgs::HomePosition homepos_;
 
   // Values received from callbacks
   quadrotor_common::QuadStateEstimate received_state_est_;
