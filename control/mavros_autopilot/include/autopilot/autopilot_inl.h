@@ -1399,6 +1399,10 @@ void AutoPilot<Tcontroller, Tparams>::publishControlCommand(
 
     // CONVERT CONTROL CMD FROM ControlCommand.msg to AttitudeTarget.msg
     mavros_msgs::AttitudeTarget control_cmd_msg;
+    control_cmd_msg.header.seq = seq_;
+    ++seq_;
+    control_cmd_msg.header.stamp = ros::Time::now();
+    control_cmd_msg.header.frame_id = "map";
     control_cmd_msg.body_rate = quadrotor_common::eigenToGeometry(control_cmd.bodyrates);
     control_cmd_msg.thrust = control_cmd.collective_thrust;
     control_cmd_msg.orientation = quadrotor_common::eigenToGeometry(control_cmd.orientation);

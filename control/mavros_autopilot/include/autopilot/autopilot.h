@@ -237,6 +237,7 @@ class AutoPilot {
   double control_command_input_timeout_;
   bool enable_command_feedthrough_;
   double predictive_control_lookahead_;
+  int seq_;
 
   // Constants
   static constexpr double kVelocityCommandZeroThreshold_ = 0.03;
