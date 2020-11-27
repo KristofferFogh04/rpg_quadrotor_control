@@ -71,9 +71,10 @@ AutoPilot<Tcontroller, Tparams>::AutoPilot(const ros::NodeHandle& nh,
 
   home_pub_ = nh_.advertise<mavros_msgs::HomePosition>("mavros/home_position", 1);
   mavros_msgs::HomePosition homepos;
-  //homepos.latitude = 56.206180;
-  //homepos.longitude = 10.187857;
-  //homepos.altitude = 0;
+  homepos.header.stamp = ros::Time::now();
+  homepos.geo.latitude = 56.206180;
+  homepos.geo.longitude = 10.187857;
+  homepos.geo.altitude = 0;
   homepos.position.x = 0;
   homepos.position.y = 0;
   homepos.position.z = 0;
