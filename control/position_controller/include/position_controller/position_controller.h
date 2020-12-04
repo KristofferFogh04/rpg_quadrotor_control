@@ -66,8 +66,10 @@ class PositionController {
   static constexpr double kMinNormalizedCollectiveThrust_ = 1.0;
   static constexpr double kAlmostZeroValueThreshold_ = 0.001;
   static constexpr double kAlmostZeroThrustThreshold_ = 0.01;
-  static constexpr double norm_thrust_const_ = 0.0401640013;
-  static constexpr double norm_thrust_offset_ = 0.109918997;
+  //static constexpr double norm_thrust_const_ = 0.0401640013;
+  //static constexpr double norm_thrust_offset_ = 0.109918997;
+  static constexpr double norm_thrust_const_ = 0.1703;
+  static constexpr double norm_thrust_offset_ = 0.2445;
 
   const Eigen::Vector3d kGravity_ = Eigen::Vector3d(0.0, 0.0, -9.80665);
 };

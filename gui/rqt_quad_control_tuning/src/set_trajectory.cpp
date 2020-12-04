@@ -70,7 +70,7 @@ void SetTrajectory::computeCircularTrajectory(
   ros::Rate command_rate(kExecLoopRate_);
 
   // Generate trajectory, sample it and send it as reference states
-  const Eigen::Vector3d center = Eigen::Vector3d(-2.0, 0.0, 10);
+  const Eigen::Vector3d center = Eigen::Vector3d(-1.0, 0.0, 1.5);
 
   quadrotor_common::Trajectory manual_traj =
       trajectory_generation_helper::circles::computeHorizontalCircleTrajectory(
@@ -102,7 +102,7 @@ void SetTrajectory::computeVerticalCircularTrajectory(
   ros::Rate command_rate(kExecLoopRate_);
 
   // Generate trajectory, sample it and send it as reference states
-  const Eigen::Vector3d center = Eigen::Vector3d(-2.0, 0.0, 12);
+  const Eigen::Vector3d center = Eigen::Vector3d(-2.0, 0.0, 1.5);
 
   quadrotor_common::Trajectory manual_traj =
       trajectory_generation_helper::circles::computeVerticalCircleTrajectory(
@@ -133,7 +133,7 @@ void SetTrajectory::computeMinimumSnapRingTrajectory(
   std::vector<Eigen::Vector3d> way_points;
   way_points.push_back(Eigen::Vector3d(-0.5, 0.0, 2.5));
   way_points.push_back(Eigen::Vector3d(1.5, -1.5, 1.6));
-  way_points.push_back(Eigen::Vector3d(3.5, 0.0, 3.0));
+  way_points.push_back(Eigen::Vector3d(3.5, 0.0, 2.0));
   way_points.push_back(Eigen::Vector3d(1.5, 2.0, 1.6));
 
   Eigen::VectorXd initial_ring_segment_times =
@@ -195,7 +195,7 @@ void SetTrajectory::computeLemniscateTrajectory(
 
     quadrotor_common::TrajectoryPoint point;
     point.time_from_start = ros::Duration(fabs(d_phi / omega));
-    point.position = radius * Eigen::Vector3d(cos(phi), sin(phi)*cos(phi), 5.0/radius);
+    point.position = radius * Eigen::Vector3d(cos(phi), sin(phi)*cos(phi), 1.5/radius);
 
     // All the derivatives
     point.velocity = 
@@ -234,10 +234,10 @@ void SetTrajectory::computeSquareTrajectory(
 
 // Ring trajectory
   std::vector<Eigen::Vector3d> way_points;
-  way_points.push_back(Eigen::Vector3d(radius, 0.0, 3.0));
-  way_points.push_back(Eigen::Vector3d(0.0, radius, 3.0));
-  way_points.push_back(Eigen::Vector3d(-radius, 0.0, 3.0));
-  way_points.push_back(Eigen::Vector3d(0.0, -radius, 3.0));
+  way_points.push_back(Eigen::Vector3d(radius, 0.0, 2.0));
+  way_points.push_back(Eigen::Vector3d(0.0, radius, 2.0));
+  way_points.push_back(Eigen::Vector3d(-radius, 0.0, 2.0));
+  way_points.push_back(Eigen::Vector3d(0.0, -radius, 2.0));
 
   Eigen::VectorXd initial_ring_segment_times =
       Eigen::VectorXd::Ones(int(way_points.size()));
