@@ -14,3 +14,6 @@ float64 k_drag_x
 float64 k_drag_y
 float64 k_drag_z
 float64 k_thrust_horz
+
+float64 norm_thrust_offset
+float64 norm_thrust_const

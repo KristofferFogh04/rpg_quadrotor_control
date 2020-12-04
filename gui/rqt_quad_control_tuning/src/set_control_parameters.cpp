@@ -31,6 +31,8 @@ void SetControlParameters::controlParametersCallback(
   target_cmd_.k_drag_y = config.k_drag_y;
   target_cmd_.k_drag_z = config.k_drag_z;
   target_cmd_.k_thrust_horz = config.k_thrust_horz;
+  target_cmd_.norm_thrust_offset = config.norm_thrust_offset;
+  target_cmd_.norm_thrust_const = config.norm_thrust_const;
 
   SetControlParameters::publishParameters(target_cmd_);
 

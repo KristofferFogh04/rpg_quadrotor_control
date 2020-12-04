@@ -839,6 +839,9 @@ void AutoPilot<Tcontroller, Tparams>::parameterCallback(
   base_controller_params_.k_drag_y = msg->k_drag_y;
   base_controller_params_.k_drag_z = msg->k_drag_z;
   base_controller_params_.k_thrust_horz = msg->k_thrust_horz;
+  base_controller_params_.norm_thrust_const = msg->norm_thrust_const;
+  base_controller_params_.norm_thrust_offset = msg->norm_thrust_offset;
+
 
   std::cout << "from autopilot: " << base_controller_params_.kpxy << std::endl;
 

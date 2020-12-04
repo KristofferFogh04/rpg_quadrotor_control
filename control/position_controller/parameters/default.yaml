@@ -22,3 +22,6 @@ position_controller:
   k_drag_y: 0.0
   k_drag_z: 0.0
   k_thrust_horz: 0.0
+
+  norm_thrust_const: 0.050164
+  norm_thrust_offset: 0.1412

@@ -102,6 +102,14 @@ class PositionControllerParams {
                                     k_thrust_horz, pnh)) {
       return false;
     }
+    if (!quadrotor_common::getParam(path_rel_to_node + "/norm_thrust_const",
+                                    norm_thrust_const, pnh)) {
+      return false;
+    }
+    if (!quadrotor_common::getParam(path_rel_to_node + "/norm_thrust_offset",
+                                    norm_thrust_offset, pnh)) {
+      return false;
+    }
 
     return true;
   }
@@ -132,6 +140,9 @@ class PositionControllerParams {
   double k_drag_z;  // z-direction rotor drag coefficient
   // thrust correction coefficient due to body horizontal velocity
   double k_thrust_horz;
+
+  double norm_thrust_const;
+  double norm_thrust_offset;
 };
 
 }  // namespace position_controller

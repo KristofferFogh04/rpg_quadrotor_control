@@ -399,8 +399,9 @@ double PositionController::computeDesiredCollectiveMassNormalizedThrust(
 
     if (config.px4_mode){
       normalized_thrust =
-      std::max(0.0, std::min(1.0, norm_thrust_const_ * desired_acc.dot(body_z_axis) + norm_thrust_offset_));
+      std::max(0.0, std::min(1.0, config.norm_thrust_const * desired_acc.dot(body_z_axis) + config.norm_thrust_offset));
     }
+
     else{
       normalized_thrust = desired_acc.dot(body_z_axis);
       if (normalized_thrust < kMinNormalizedCollectiveThrust_) {
