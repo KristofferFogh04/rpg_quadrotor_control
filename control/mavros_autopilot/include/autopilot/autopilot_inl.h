@@ -349,7 +349,7 @@ void AutoPilot<Tcontroller, Tparams>::cmdLoop(){
 
   std::lock_guard<std::mutex> main_lock(main_mutex_);
 
-  home_pub_.publish(homepos_);
+  //home_pub_.publish(homepos_);
   nav_msgs::Odometry temp_state_estimate_msg;
   temp_state_estimate_msg.pose.pose = temp_pose_estimate_.pose;
   temp_state_estimate_msg.twist.twist = temp_vel_estimate_.twist;
