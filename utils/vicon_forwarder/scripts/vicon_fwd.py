@@ -31,7 +31,10 @@ class ViconAdapter:
 
         self.plot_msg.header.seq = self.seq
         self.plot_msg.header.stamp = rospy.get_rostime()
-        self.plot_msg.pose.pose = data.pose
+        self.plot_msg.pose.pose.position.x = data.transform.translation.x
+        self.plot_msg.pose.pose.position.y = data.transform.translation.y
+        self.plot_msg.pose.pose.position.z = data.transform.translation.z
+        self.plot_msg.pose.pose.orientation = data.transform.rotation
         self.pub_plot.publish(self.plot_msg)
 
         self.seq += 1
