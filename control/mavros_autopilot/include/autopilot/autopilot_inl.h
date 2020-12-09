@@ -1279,6 +1279,7 @@ AutoPilot<Tcontroller, Tparams>::executeTrajectory(
   ref_point_.pose.pose.orientation = quadrotor_common::eigenToGeometry(traj_point.orientation);
   ref_point_.header.frame_id = "map";
   ref_point_.child_frame_id = "base_link";
+  ref_point_.header.stamp = ros::Time::now();
   reference_pub_.publish(ref_point_);
 
 
