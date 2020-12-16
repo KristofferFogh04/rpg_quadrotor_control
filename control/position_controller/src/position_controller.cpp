@@ -337,7 +337,6 @@ void PositionController::computeAeroCompensatedReferenceInputs(
   *drag_accelerations =
       -1.0 *
       (R_W_B_ref * (D * (R_W_B_ref.transpose() * reference_state.velocity)));
-  std::cout << "Computed drag acceleration" << std::endl;
 }
 
 Eigen::Vector3d PositionController::computePIDErrorAcc(
