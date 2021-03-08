@@ -4,6 +4,7 @@ SetTrajectory::SetTrajectory(ros::NodeHandle& nh_) : // default constructor for
 nh_(nh_)
 {
   std::cout << "Void constructor" << std::endl;
+  exitFlag = false;
   // ROS publishers:
   
 }
@@ -56,8 +57,16 @@ void SetTrajectory::trajectoryCallback(
       config.max_thrust, 
       config.max_roll_pitch_rate);
     break;
+  case 6:
+    std::cout << "Continuous Random Minimum Snap" << std::endl;
+    SetTrajectory::computeRandomMinSnap();
+    break;
+  case 7:
+    std::cout << "Exit Continuous Random Minimum Snap" << std::endl;
+    exitFlag = true;
+    break;
   default:
-  std::cout << "Not recognized. Doing nothing" << std::endl;
+    std::cout << "Not recognized. Doing nothing" << std::endl;
     // code block
   }
 }
@@ -275,6 +284,87 @@ void SetTrajectory::computeSquareTrajectory(
   // Send entire trajectory
   autopilot_helper_.sendTrajectory(ring_traj);
 
+}
+
+void SetTrajectory::computeRandomMinSnap(){
+
+  double max_x = 2;
+  double min_x = -2;
+  double max_y = 2;
+  double min_y = -2;
+  double max_z = 2.5;
+  double min_z = 0.2;
+  int num_waypoints = 4;
+
+  while (exitFlag == false){
+
+    std::vector<Eigen::Vector3d> way_points;
+
+    for (int i = 0; i < num_waypoints; i++) {
+      way_points.push_back(Eigen::Vector3d(RandomDouble(min_x, max_x),
+                                           RandomDouble(min_y, max_y),
+                                           RandomDouble(min_z, max_z)));
+    }
+    //double num_rotations = RandomDouble(0, 25);
+    //double velocity = RandomDouble(0.1, 4);
+    //double max_thrust = RandomDouble(1, 30);
+    //double max_roll_pitch_rate = RandomDouble(0, 2);
+    double num_rotations = 3.14;
+    double velocity = 1.5;
+    double max_thrust = 15;
+    double max_roll_pitch_rate = 1;
+
+      Eigen::VectorXd initial_ring_segment_times =
+          Eigen::VectorXd::Ones(int(way_points.size()));
+      polynomial_trajectories::PolynomialTrajectorySettings
+          ring_trajectory_settings;
+      ring_trajectory_settings.continuity_order = 4;
+      Eigen::VectorXd minimization_weights(5);
+      minimization_weights << 0.0, 1.0, 1.0, 1.0, 1.0;
+      ring_trajectory_settings.minimization_weights = minimization_weights;
+      ring_trajectory_settings.polynomial_order = 11;
+      ring_trajectory_settings.way_points = way_points;
+
+      quadrotor_common::Trajectory ring_traj = trajectory_generation_helper::
+          polynomials::generateMinimumSnapRingTrajectoryWithSegmentRefinement(
+              initial_ring_segment_times, ring_trajectory_settings, velocity,
+              max_thrust, max_roll_pitch_rate, kExecLoopRate_);
+
+      trajectory_generation_helper::heading::addConstantHeadingRate(0.0, num_rotations,
+                                                                    &ring_traj);
+
+       // Last trajectory point is for some reason weird so we remove it
+      ring_traj.points.pop_back();
+      std::cout << "Waiting for hover" << std::endl;
+      autopilot_helper_.waitForSpecificAutopilotState(
+          autopilot::States::HOVER, 100.0, kExecLoopRate_);
+
+      // Go to first point of trajectory manually
+      std::cout << "Sending first pose command" << std::endl;
+      autopilot_helper_.sendPoseCommand(ring_traj.points.front().position, 0.0);
+
+      // Wait for autopilot to go to got to pose state
+      std::cout << "Waiting for Trajectory control state" << std::endl;
+      autopilot_helper_.waitForSpecificAutopilotState(
+          autopilot::States::TRAJECTORY_CONTROL, 20.0, kExecLoopRate_);
+
+      // Wait for autopilot to go back to hover
+      std::cout << "Waiting for hover" << std::endl;
+      autopilot_helper_.waitForSpecificAutopilotState(
+          autopilot::States::HOVER, 100.0, kExecLoopRate_);
+
+      // Send entire trajectory
+      std::cout << "Sending trajectory" << std::endl;
+      autopilot_helper_.sendTrajectory(ring_traj);
+    }
+  exitFlag = false;
+}
+
+double SetTrajectory::RandomDouble(double a, double b) {
+    double random = ((double) rand()) / (double) RAND_MAX;
+    double diff = b - a;
+    double r = random * diff;
+    return a + r;
 }
 
  // Main node

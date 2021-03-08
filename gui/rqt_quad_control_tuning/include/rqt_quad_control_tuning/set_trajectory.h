@@ -10,6 +10,8 @@
 #include <trajectory_generation_helper/circle_trajectory_helper.h>
 #include <trajectory_generation_helper/polynomial_trajectory_helper.h>
 #include <cmath>
+#include <random>
+
 
 class SetTrajectory
 {
@@ -41,6 +43,8 @@ class SetTrajectory
     double speed, 
     double max_thrust, 
     double max_roll_pitch_rate);
+  void computeRandomMinSnap();
+  double RandomDouble(double a, double b);
 
 
  private:
@@ -52,6 +56,7 @@ class SetTrajectory
   quadrotor_common::Trajectory target_trajectory_;
 
   int traj_type_;
+  bool exitFlag;
 
   // Constants
   static constexpr double kExecLoopRate_ = 30.0;
